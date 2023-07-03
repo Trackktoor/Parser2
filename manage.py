@@ -7,6 +7,10 @@
 # Модуль os в Python предоставляет функции для взаимодействия с операционной системой.
 import os
 
+# Модуль для явного указания типов данных
+from typing import NoReturn
+from typing import List
+
 # Модуль os в Python предоставляет функции для взаимодействия с операционной системой.
 import time
 
@@ -21,13 +25,14 @@ from selenium import webdriver
 # Service нужен для конфигурации и запуска экземпляра webdriver(браузер)
 from selenium.webdriver.firefox.service import Service
 
+# Класс для поиска элементов на страничке (по классам, id и т.д.)
 from selenium.webdriver.common.by import By
 
+# Исключение Selenium которое вызывается при не нахождении элемента
 from selenium.common.exceptions import NoSuchElementException
 
+# Функция для сбора информации о первом элементе с странички Avito
 from parser_modules.parser_avito import parse_first_add_avito
-
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 
 class WebDriverExeption(Exception):
@@ -37,39 +42,38 @@ class WebDriverExeption(Exception):
     def __str__(self) -> str:
         return str(traceback.format_exc())
 
-def scroll_down(passed_in_driver):
+def scroll_down(passed_in_driver: webdriver.Firefox) -> NoReturn: # type: ignore
     """
         Функция для скролла странички вниз на 200px
     """
-
-    scroll_nav_out_of_way = 'window.scrollBy(0, 200);'
+    scroll_nav_out_of_way: str = 'window.scrollBy(0, 200);'
     passed_in_driver.execute_script(scroll_nav_out_of_way)
 
-def initial_browser():
+def initial_browser() -> webdriver.Firefox:
     """
         Функция для инициализации браузера
         Возвращает экземпляр webdriver в котором
         открыты все нужные ссыллки авито
     """
-    install_dir = ".\\additional_tools\\Mozilla Firefox\\"
-    driver_loc = os.path.join(install_dir, "geckodriver")
-    binary_loc = os.path.join(install_dir, "firefox.exe")
+    install_dir: str = ".\\additional_tools\\Mozilla Firefox\\"
+    driver_loc: str = os.path.join(install_dir, "geckodriver")
+    binary_loc: str = os.path.join(install_dir, "firefox.exe")
 
-    service = Service(driver_loc)
+    service: Service = Service(driver_loc)
 
-    opts = webdriver.FirefoxOptions()
+    opts: webdriver.FirefoxOptions = webdriver.FirefoxOptions()
     opts.set_preference('dom.webdriver.enabled', False)
     opts.add_argument('-headless')
     opts.binary_location = binary_loc
     opts.set_preference("log.level", "OFF")
     opts.page_load_strategy = 'none'
 
-    browser = webdriver.Firefox(service=service, options=opts)
+    browser: webdriver.Firefox = webdriver.Firefox(service=service, options=opts)
 
     return browser
 
 # pylint: disable=line-too-long
-AVITO_LINKS = [
+AVITO_LINKS: List[str] = [
     'https://www.avito.ru/moskva/kvartiry/sdam/na_dlitelnyy_srok-ASgBAgICAkSSA8gQ8AeQUg?f=ASgBAgICA0SSA8gQ8AeQUsDBDbr9Nw&localPriority=0&p=1&s=104&user=1',
     'https://www.avito.ru/reutov/kvartiry/sdam/na_dlitelnyy_srok-ASgBAgICAkSSA8gQ8AeQUg?s=104&user=1',
     'https://www.avito.ru/lyubertsy/kvartiry/sdam/na_dlitelnyy_srok-ASgBAgICAkSSA8gQ8AeQUg?s=104&user=1',
@@ -89,35 +93,54 @@ AVITO_LINKS = [
     'https://www.avito.ru/podolsk/kvartiry/sdam/na_dlitelnyy_srok-ASgBAgICAkSSA8gQ8AeQUg?s=104&user=1',
     'https://www.avito.ru/tyumenskaya_oblast_moskovskiy/kvartiry/sdam/na_dlitelnyy_srok-ASgBAgICAkSSA8gQ8AeQUg?s=104&user=1'
 ]
-CIAN_LINK = 'https://www.cian.ru/cat.php?deal_type=rent&engine_version=2&is_by_homeowner=1&offer_type=flat&region=1&room1=1&room2=1&room3=1&room4=1&room5=1&room6=1&sort=creation_date_desc&type=4'
+CIAN_LINK: str = 'https://www.cian.ru/cat.php?deal_type=rent&engine_version=2&is_by_homeowner=1&offer_type=flat&region=1&room1=1&room2=1&room3=1&room4=1&room5=1&room6=1&sort=creation_date_desc&type=4'
 # pylint: enable=line-too-long
 
-TIME_SLEEP = 1
+# Парметр для задержки в отправке запросов
+TIME_SLEEP: int = 1
 
-def initial_start(avito_links, cian_link):
+def initial_start(avito_links: List[str], cian_link: str) -> NoReturn:# type: ignore
     """
         Функция для старта всего сервиса
         Собирает все модули в одном месте и управляет ими
     """
-    titles_adds = []
-    median_time = 0
 
-    browser = initial_browser()
+    # Массив для объявлений
+    titles_adds: List[str] = []
+    # Счетчик для среднего времени выполнения
+    median_time: float = 0.0
+
+    # Получаем инициализированный браузер
+    browser: webdriver.Firefox = initial_browser()
 
     try:
+        # Цикл для ссылок авито
         for link in avito_links:
-            start_time = time.time()
+            # Отметка времени начала сбора информации из
+            # первого объявления
+            start_time: float = time.time()
+            # получение странички по ссылке
             browser.get(link)
             try:
+                # Ищем элемент в котором есть надпись о том что нет объявлений
                 browser.find_element(By.CLASS_NAME, 'no-results-root-bWQVm')
                 titles_adds.append('null')
+                # Если такого нет вызывается исключение NoSuchElementException и мы переходим
+                # в блок except
             except NoSuchElementException:
-                title_ad = parse_first_add_avito(browser)
+                # Получение информации о первом посте
+                title_ad: str = parse_first_add_avito(browser)
+                # Добавляем объявление в массив с объявлениями
                 titles_adds.append(title_ad)
+                # Тайм слип чтобы не забанили
                 time.sleep(TIME_SLEEP)
-
-                median_time += time.time() - start_time
-                print(f"--- {time.time() - start_time} seconds ---" % ())
+                # Находим время выполнения
+                lead_time: float = time.time() - start_time
+                # Добавляем к общему счетчику времени
+                median_time += lead_time
+                # Вывод время выполнения на одну ссылку
+                print(f"--- {lead_time} seconds ---" % ())
+        # Находим среднее время выполнения и выводим
         print('-'*60 + '\n' + f'{" "*16}median time: {median_time/17}'.upper() + '\n' + '-'*60)
     except WebDriverExeption as ex:
         print(ex)
@@ -128,4 +151,3 @@ def initial_start(avito_links, cian_link):
 
 if __name__ == '__main__':
     initial_start(AVITO_LINKS,CIAN_LINK)
-    time.sleep(2)
