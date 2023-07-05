@@ -1,3 +1,7 @@
+"""
+    Файл с функциями для парсинга циана
+"""
+
 # from selenium.webdriver.common.by import By
 
 
@@ -32,3 +36,6 @@
 #     }
 
 #     return result
+
+if __name__ == '__main__':
+    pass

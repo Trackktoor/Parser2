@@ -1,3 +1,4 @@
 /env
 /additional_tools
 /__pycache__
+*.pyc
