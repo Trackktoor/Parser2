@@ -15,7 +15,9 @@ import configparser
 from helper_modules.webdriver_handlers import initial_start
 
 
-# создаём объекта парсера
+### ПОЛУЧЕНИЕ ПАРАМЕТРОВ КОНФИГУРАЦИИ ###
+
+# создаём объекта парсера конфигурации
 config = configparser.ConfigParser()
 # читаем конфиг
 config.read("settings.ini")
@@ -26,11 +28,10 @@ AVITO_LINKS: List[str] = [
         'avito_links'
     ).split(',')
 ]
-# pylint: disable=line-too-long
-CIAN_LINK: str = 'https://www.cian.ru/cat.php?deal_type=rent&engine_version=2&is_by_homeowner=1&offer_type=flat&region=1&room1=1&room2=1&room3=1&room4=1&room5=1&room6=1&sort=creation_date_desc&type=4'
-# pylint: enable=line-too-long
 
+CIAN_LINK: str = config.get('PARSER_LINKS', 'cian_link')
 
 if __name__ == '__main__':
-    initial_start(avito_links=AVITO_LINKS,
-                  cian_link=CIAN_LINK)
+    # initial_start(avito_links=AVITO_LINKS,
+    #               cian_link=CIAN_LINK)
+    print(CIAN_LINK)

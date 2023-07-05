@@ -44,26 +44,31 @@ def scroll_down(passed_in_driver: webdriver.Firefox) -> NoReturn:  # type: ignor
 def initial_browser() -> webdriver.Firefox:
     """
         Функция для инициализации браузера
-        Возвращает экземпляр webdriver в котором
-        открыты все нужные ссыллки авито
+        Возвращает экземпляр webdriver
     """
     install_dir: str = ".\\additional_tools\\Mozilla Firefox\\"
+    # Путь до драйвер браузера
     driver_loc: str = os.path.join(install_dir, "geckodriver")
+    # Сам браузере .exe
     binary_loc: str = os.path.join(install_dir, "firefox.exe")
 
     service: Service = Service(driver_loc)
 
     opts: webdriver.FirefoxOptions = webdriver.FirefoxOptions()
     opts.set_preference('dom.webdriver.enabled', False)
+    # Параметр для отключения графческой оболочки
     opts.add_argument('-headless')
     opts.binary_location = binary_loc
+    # Отключение логов
     opts.set_preference("log.level", "OFF")
+    # Стратегия загрузки страницы
     opts.page_load_strategy = 'eager'
 
     browser: webdriver.Firefox = webdriver.Firefox(
         service=service, options=opts)
 
     return browser
+
 # pylint: disable=line-too-long
 def initial_start(avito_links: List[str], cian_link: str) -> NoReturn:# type: ignore
     """
@@ -116,8 +121,9 @@ def initial_start(avito_links: List[str], cian_link: str) -> NoReturn:# type: ig
                 else:
                     print(f"{'-'*60} INFO NOT FOUND OR NOT VALID{'-'*60}")
 
-        # Находим среднее время выполнения и выводим
+        # Выводим общее рвемя выполнения за один цикл
         print('-'*60 + '\n' + f'{" "*16}count time: {count}'.upper() + '\n' + '-'*60)
+        # Находим среднее время выполнения и выводим
         print('-'*60 + '\n' + f'{" "*16}median time: {median_time/17}'.upper() + '\n' + '-'*60)
     except WebDriverExeption as ex:
         print(ex)

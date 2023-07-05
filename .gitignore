@@ -1,4 +1,5 @@
-/env
-/additional_tools
-/__pycache__
-*.pyc
+env/
+additional_tools/
+__pycache__/
+.vscode/
+*.log
