@@ -3,3 +3,5 @@ additional_tools/
 __pycache__/
 .vscode/
 *.log
+*.pyc
+*.jpg

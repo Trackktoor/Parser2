@@ -32,6 +32,5 @@ AVITO_LINKS: List[str] = [
 CIAN_LINK: str = config.get('PARSER_LINKS', 'cian_link')
 
 if __name__ == '__main__':
-    # initial_start(avito_links=AVITO_LINKS,
-    #               cian_link=CIAN_LINK)
-    print(CIAN_LINK)
+    initial_start(avito_links=AVITO_LINKS,
+                  cian_link=CIAN_LINK)

@@ -8,6 +8,9 @@ import os
 # Модуль os в Python предоставляет функции для взаимодействия с операционной системой.
 import time
 
+# Модуль ranodm предназначени для получения условно случайных результатов
+import random
+
 # Модуль для явного указания типов данных
 from typing import NoReturn
 from typing import List,Dict
@@ -57,7 +60,7 @@ def initial_browser() -> webdriver.Firefox:
     opts: webdriver.FirefoxOptions = webdriver.FirefoxOptions()
     opts.set_preference('dom.webdriver.enabled', False)
     # Параметр для отключения графческой оболочки
-    opts.add_argument('-headless')
+    # opts.add_argument('-headless')
     opts.binary_location = binary_loc
     # Отключение логов
     opts.set_preference("log.level", "OFF")
@@ -93,6 +96,8 @@ def initial_start(avito_links: List[str], cian_link: str) -> NoReturn:# type: ig
             start_time: float = time.time()
             # получение странички по ссылке
             browser.get(link)
+            # Делаем рандомную остановку для симуляции работы настоящего пользователя
+            time.sleep(random.uniform(1.0, 1.5))
             try:
                 # Ищем элемент в котором есть надпись о том что нет объявлений
                 browser.find_element(By.CLASS_NAME, 'no-results-root-bWQVm')
@@ -104,10 +109,6 @@ def initial_start(avito_links: List[str], cian_link: str) -> NoReturn:# type: ig
                 ad_info: Dict[str,str] = parse_first_add_avito(browser)
                 # Проверка данных на валидность
                 if ad_data_validator(ad_info):
-                    title_ad: str = ad_info['title']
-                    # date_ad: str = ad_info['date']
-                    # Добавляем объявление в массив с объявлениями
-                    titles_adds.append(title_ad)
                     # Находим время выполнения
                     lead_time: float = time.time() - start_time
                     # Добавляем к словарю с информацией время работы для вывода
@@ -119,7 +120,7 @@ def initial_start(avito_links: List[str], cian_link: str) -> NoReturn:# type: ig
                     # Вывод инфмормации одного объявления
                     print(beautiful_info_cmd(ad_info))
                 else:
-                    print(f"{'-'*60} INFO NOT FOUND OR NOT VALID{'-'*60}")
+                    print(beautiful_info_cmd({'error_info':'INFO NOT FOUND OR NOT VALID'}))
 
         # Выводим общее рвемя выполнения за один цикл
         print('-'*60 + '\n' + f'{" "*16}count time: {count}'.upper() + '\n' + '-'*60)
@@ -128,7 +129,7 @@ def initial_start(avito_links: List[str], cian_link: str) -> NoReturn:# type: ig
     except WebDriverExeption as ex:
         print(ex)
     finally:
-        print('-'*60 + '\n' + f'{" "*16}End of service'.upper() + '\n' + '-'*60)
+        print(beautiful_info_cmd({'end':'End of service'}))
         browser.close()
         browser.quit()
 
