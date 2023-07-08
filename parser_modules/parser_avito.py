@@ -42,16 +42,14 @@ from selenium.webdriver.support.ui import WebDriverWait  # type: ignore
 # Класс для условий ожидания
 from selenium.webdriver.support import expected_conditions as EC
 
-# Класс элемента на страничке
-from selenium.webdriver.remote.webelement import WebElement
-
 # Таких как наведение курсора на элемент
 from selenium.webdriver.common.action_chains import ActionChains
 
 # Функция для красивого вывода информации
 from helper_modules.output_data_handlers import beautiful_info_cmd
 
-# Функция для наведения курсора на элемент
+
+# ВЗАИМОДЕЙСТВИЕ С БРАУЗЕРОМ
 
 
 def move_to_element_castom(browser: webdriver.Firefox, element: WebElement):
@@ -60,6 +58,9 @@ def move_to_element_castom(browser: webdriver.Firefox, element: WebElement):
     """
     action = ActionChains(browser)
     action.move_to_element(element).perform()
+
+
+# ОБЩИЕ ФУНКЦИИ ДЛЯ СБОРА ИНФОРМАЦИИ С ОБЪЯВЛЕНИЯ
 
 
 def find_element_on_page_by_class_name(browser: webdriver.Firefox, class_: str) -> Union[WebElement, None]:
@@ -88,6 +89,23 @@ def parse_item_info_on_add_by_class_name(browser: webdriver.Firefox, class_: str
     if info is not None:
         return info.text
 
+    return 'None'
+
+
+# ФУНКЦИИ ДЛЯ СБОРА ИНФОРМАЦИИ ПО ПОЛЯМ ОБЪЯВЛЕНИЯ
+
+def parse_url_add_avito(browser: webdriver.Firefox) -> str:
+    """
+        Функция для сбора ссылки на объявление
+    """
+    ad_container = find_element_on_page_by_class_name(
+        browser, 'iva-item-title-py3i_')
+    if ad_container is not None:
+        link_container = ad_container.find_element(By.TAG_NAME, 'a')
+        link_href_container = link_container.get_attribute('href')
+        if link_href_container is not None:
+            return str(link_container.get_attribute('href'))
+        print(beautiful_info_cmd({'not_found': 'URL NOT FOUND'}))
     return 'None'
 
 
@@ -194,10 +212,13 @@ def parse_first_add_avito(browser: webdriver.Firefox) -> Dict[str, str]:
 
     phone: Union[str, None] = parse_phone_add_avito(browser)
 
+    url: str = parse_url_add_avito(browser)
+
     return {
         'title': title,
         'date': date,
         'phone': phone if phone is not None else 'Не найден',
+        'url': url if url is not 'None' else 'Не найден'
     }
 
 

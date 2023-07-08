@@ -8,11 +8,7 @@ import os
 # Модуль os в Python предоставляет функции для взаимодействия с операционной системой.
 import time
 
-# Модуль ranodm предназначени для получения условно случайных результатов
-import random
-
 # Модуль для явного указания типов данных
-from typing import NoReturn
 from typing import List, Dict
 
 
@@ -44,7 +40,7 @@ def scroll_down(passed_in_driver: webdriver.Firefox):
     """
         Функция для скролла странички вниз на 200px
     """
-    scroll_nav_out_of_way: str = 'window.scrollBy(0, 200);'
+    scroll_nav_out_of_way: str = 'window.scrollBy(0, 300);'
     passed_in_driver.execute_script(scroll_nav_out_of_way)
 
 
@@ -80,7 +76,7 @@ def initial_browser() -> webdriver.Firefox:
 
 
 # type: ignore
-def initial_start(avito_links: List[str], cian_link: str) -> NoReturn:
+def initial_start(avito_links: List[str], cian_link: str):
     """
         Функция для старта всего сервиса
         Собирает все модули в одном месте и управляет ими
