@@ -94,6 +94,26 @@ def parse_item_info_on_add_by_class_name(browser: webdriver.Firefox, class_: str
 
 # ФУНКЦИИ ДЛЯ СБОРА ИНФОРМАЦИИ ПО ПОЛЯМ ОБЪЯВЛЕНИЯ
 
+def parse_address_add_avito(browser: webdriver.Firefox) -> str:
+    """
+        Функция для сбора адреса объявления
+    """
+
+    address = parse_item_info_on_add_by_class_name(browser, 'geo-root-zPwRk')
+
+    return address
+
+
+def parse_price_add_avito(browser: webdriver.Firefox) -> str:
+    """
+        Функция для сбора цены на объявление
+    """
+    price = parse_item_info_on_add_by_class_name(
+        browser, 'styles-module-root-LIAav')
+    price = price.replace('\xa0', '')[:-10]
+    return price
+
+
 def parse_url_add_avito(browser: webdriver.Firefox) -> str:
     """
         Функция для сбора ссылки на объявление
@@ -214,11 +234,18 @@ def parse_first_add_avito(browser: webdriver.Firefox) -> Dict[str, str]:
 
     url: str = parse_url_add_avito(browser)
 
+    price: str = parse_price_add_avito(browser)
+
+    address: str = parse_address_add_avito(browser)
+
     return {
         'title': title,
         'date': date,
         'phone': phone if phone is not None else 'Не найден',
-        'url': url if url is not 'None' else 'Не найден'
+        'url': url if url is not 'None' else 'Не найден',
+        'price': str(price) if price is not 'None' else 'Не найден',
+        'address': address if address is not 'None' else 'Не найден',
+        'marketing_source': '1'
     }
 
 

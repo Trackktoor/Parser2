@@ -60,7 +60,7 @@ def initial_browser() -> webdriver.Firefox:
     opts: webdriver.FirefoxOptions = webdriver.FirefoxOptions()
     opts.set_preference('dom.webdriver.enabled', False)
     # Параметр для отключения графческой оболочки
-    # opts.add_argument('-headless')
+    opts.add_argument('-headless')
     opts.binary_location = binary_loc
     # Отключение логов
     opts.set_preference("log.level", "OFF")
@@ -83,7 +83,7 @@ def initial_start(avito_links: List[str], cian_link: str):
     """
 # pylint: enable=line-too-long
     # Массив для объявлений
-    titles_adds: List[str] = []
+    adds_info: List[Dict] = []
     # Счетчик для среднего времени выполнения
     median_time: float = 0.0
     # Счетчик для общего времени за цикл
@@ -105,7 +105,7 @@ def initial_start(avito_links: List[str], cian_link: str):
             try:
                 # Ищем элемент в котором есть надпись о том что нет объявлений
                 browser.find_element(By.CLASS_NAME, 'no-results-root-bWQVm')
-                titles_adds.append('null')
+                adds_info.append({'null': 'null'})
                 # Если такого нет вызывается исключение NoSuchElementException и мы переходим
                 # в блок except
             except NoSuchElementException:
