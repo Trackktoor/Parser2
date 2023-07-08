@@ -13,18 +13,21 @@ import random
 
 # Модуль для явного указания типов данных
 from typing import NoReturn
-from typing import List,Dict
+from typing import List, Dict
 
 
 # Модули Selenium
 # Класс webdriver нужен для инициализации бразуера
 from selenium import webdriver
+
 # Класс для поиска элементов на страничке (по классам, id и т.д.)
 from selenium.webdriver.common.by import By
 # Исключение Selenium которое вызывается при не нахождении элемента
 from selenium.common.exceptions import NoSuchElementException
 # Service нужен для конфигурации и запуска экземпляра webdriver(браузер)
 from selenium.webdriver.firefox.service import Service
+# Класс ActionChains используется для выполнения действий на страничке
+
 
 # Вспомогательные функции
 # Функция для сбора информации о первом элементе с странички Avito
@@ -37,12 +40,13 @@ from helper_modules.validators import ad_data_validator
 from helper_modules.output_data_handlers import beautiful_info_cmd
 
 
-def scroll_down(passed_in_driver: webdriver.Firefox) -> NoReturn:  # type: ignore
+def scroll_down(passed_in_driver: webdriver.Firefox):
     """
         Функция для скролла странички вниз на 200px
     """
     scroll_nav_out_of_way: str = 'window.scrollBy(0, 200);'
     passed_in_driver.execute_script(scroll_nav_out_of_way)
+
 
 def initial_browser() -> webdriver.Firefox:
     """
@@ -73,7 +77,10 @@ def initial_browser() -> webdriver.Firefox:
     return browser
 
 # pylint: disable=line-too-long
-def initial_start(avito_links: List[str], cian_link: str) -> NoReturn:# type: ignore
+
+
+# type: ignore
+def initial_start(avito_links: List[str], cian_link: str) -> NoReturn:
     """
         Функция для старта всего сервиса
         Собирает все модули в одном месте и управляет ими
@@ -96,8 +103,9 @@ def initial_start(avito_links: List[str], cian_link: str) -> NoReturn:# type: ig
             start_time: float = time.time()
             # получение странички по ссылке
             browser.get(link)
-            # Делаем рандомную остановку для симуляции работы настоящего пользователя
-            time.sleep(random.uniform(1.0, 1.5))
+            # Производиться скролл для того чтобы объявление было в зоне видимости
+            scroll_down(browser)
+
             try:
                 # Ищем элемент в котором есть надпись о том что нет объявлений
                 browser.find_element(By.CLASS_NAME, 'no-results-root-bWQVm')
@@ -106,7 +114,7 @@ def initial_start(avito_links: List[str], cian_link: str) -> NoReturn:# type: ig
                 # в блок except
             except NoSuchElementException:
                 # Получение информации о первом посте
-                ad_info: Dict[str,str] = parse_first_add_avito(browser)
+                ad_info: Dict[str, str] = parse_first_add_avito(browser)
                 # Проверка данных на валидность
                 if ad_data_validator(ad_info):
                     # Находим время выполнения
@@ -120,18 +128,22 @@ def initial_start(avito_links: List[str], cian_link: str) -> NoReturn:# type: ig
                     # Вывод инфмормации одного объявления
                     print(beautiful_info_cmd(ad_info))
                 else:
-                    print(beautiful_info_cmd({'error_info':'INFO NOT FOUND OR NOT VALID'}))
+                    print(beautiful_info_cmd(
+                        {'error_info': 'INFO NOT FOUND OR NOT VALID'}))
 
         # Выводим общее рвемя выполнения за один цикл
-        print('-'*60 + '\n' + f'{" "*16}count time: {count}'.upper() + '\n' + '-'*60)
+        print('-'*60 + '\n' +
+              f'{" "*16}count time: {count}'.upper() + '\n' + '-'*60)
         # Находим среднее время выполнения и выводим
-        print('-'*60 + '\n' + f'{" "*16}median time: {median_time/17}'.upper() + '\n' + '-'*60)
+        print('-'*60 + '\n' +
+              f'{" "*16}median time: {median_time/17}'.upper() + '\n' + '-'*60)
     except WebDriverExeption as ex:
         print(ex)
     finally:
-        print(beautiful_info_cmd({'end':'End of service'}))
+        print(beautiful_info_cmd({'end': 'End of service'}))
         browser.close()
         browser.quit()
+
 
 if __name__ == '__main__':
     pass

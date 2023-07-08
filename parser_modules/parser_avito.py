@@ -42,7 +42,24 @@ from selenium.webdriver.support.ui import WebDriverWait  # type: ignore
 # Класс для условий ожидания
 from selenium.webdriver.support import expected_conditions as EC
 
+# Класс элемента на страничке
+from selenium.webdriver.remote.webelement import WebElement
+
+# Таких как наведение курсора на элемент
+from selenium.webdriver.common.action_chains import ActionChains
+
+# Функция для красивого вывода информации
 from helper_modules.output_data_handlers import beautiful_info_cmd
+
+# Функция для наведения курсора на элемент
+
+
+def move_to_element_castom(browser: webdriver.Firefox, element: WebElement):
+    """
+        Функция наводится на элемент
+    """
+    action = ActionChains(browser)
+    action.move_to_element(element).perform()
 
 
 def find_element_on_page_by_class_name(browser: webdriver.Firefox, class_: str) -> Union[WebElement, None]:
@@ -56,20 +73,23 @@ def find_element_on_page_by_class_name(browser: webdriver.Firefox, class_: str) 
         ))
         return element
     except TimeoutException:
-        print(beautiful_info_cmd({'error':'ELEMENT NOT FOUND ON 10 SECONDS'}))
+        print(beautiful_info_cmd({'error': 'ELEMENT NOT FOUND ON 10 SECONDS'}))
         print(traceback.format_exc())
         return None
+
 
 def parse_item_info_on_add_by_class_name(browser: webdriver.Firefox, class_: str) -> str:
     """
         Функция-шаблон для сбора информации по классам из 1-го объявления Avito
         В случае когда элемент не найден возвращает "None"
     """
-    info: Union[WebElement, None] = find_element_on_page_by_class_name(browser, class_)
+    info: Union[WebElement, None] = find_element_on_page_by_class_name(
+        browser, class_)
     if info is not None:
         return info.text
 
     return 'None'
+
 
 def parse_date_add_avito(browser: webdriver.Firefox) -> str:
     """
@@ -90,6 +110,7 @@ def parse_date_add_avito(browser: webdriver.Firefox) -> str:
             return str(datetime.now() - timedelta(minutes=int(time_split[0])) - timedelta(hours=3))
     return 'None'
 
+
 def parse_phone_add_avito(browser: webdriver.Firefox) -> Union[str, None]:
     """
         Функция собирает номер телефона с первого объявления на авито
@@ -107,7 +128,7 @@ def parse_phone_add_avito(browser: webdriver.Firefox) -> Union[str, None]:
         out.close()
         return 'phone_image.png'
 
-    def read_img(img_name:str) -> str:
+    def read_img(img_name: str) -> str:
         """
             Функция переводи картинку в .jpg читает с нё текст
             и удаляет саму картинку возвращая при этом текст,
@@ -137,18 +158,29 @@ def parse_phone_add_avito(browser: webdriver.Firefox) -> Union[str, None]:
 
         return phone_str
 
-    button = find_element_on_page_by_class_name(browser, 'desktop-1hb0oo7')
-    if button is not None:
-        button.click()
-        phone_image = find_element_on_page_by_class_name(browser, 'button-phone-image-LkzoU')
+    # Находим контейнер кнопки
+    button_container = find_element_on_page_by_class_name(
+        browser, 'iva-item-aside-GOesg')
+    if button_container is not None:
+        # Если находим контейнер с кнопкой то наводимся на него
+        move_to_element_castom(browser, button_container)
+        # Получаем кнопку
+        button = find_element_on_page_by_class_name(browser, 'desktop-1hb0oo7')
+        if button is not None:
+            button.click()
+            # Ищем изображение номер телефона
+            phone_image = find_element_on_page_by_class_name(
+                browser, 'button-phone-image-LkzoU')
 
-        if phone_image is not None:
-            src_image = phone_image.get_attribute('src')
-            print('src_image: OK')
-            if src_image is not None:
-                phone_number = get_phone_number_on_image(src_image)
-                return phone_number
+            if phone_image is not None:
+                # Получаем src изображения
+                src_image = phone_image.get_attribute('src')
+                print('src_image: OK')
+                if src_image is not None:
+                    phone_number = get_phone_number_on_image(src_image)
+                    return phone_number
     return None
+
 
 def parse_first_add_avito(browser: webdriver.Firefox) -> Dict[str, str]:
     """
@@ -160,13 +192,14 @@ def parse_first_add_avito(browser: webdriver.Firefox) -> Dict[str, str]:
 
     date: str = parse_date_add_avito(browser)
 
-    phone: Union[str,None] = parse_phone_add_avito(browser)
+    phone: Union[str, None] = parse_phone_add_avito(browser)
 
     return {
         'title': title,
         'date': date,
         'phone': phone if phone is not None else 'Не найден',
     }
+
 
 if __name__ == '__main__':
     pass
