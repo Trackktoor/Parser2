@@ -8,6 +8,9 @@ import os
 # Модуль os в Python предоставляет функции для взаимодействия с операционной системой.
 import time
 
+# Модуль для асинхронных операций
+import asyncio
+
 # Модуль для явного указания типов данных
 from typing import List, Dict
 
@@ -117,9 +120,9 @@ def initial_start(avito_links: List[str], cian_link: str):
             start_time: float = time.time()
             # получение странички по ссылке
             browser.set_window_size(100, 100)
+            time.sleep(1)
             browser.get(link)
             browser.set_window_size(1200, 760)
-            time.sleep(10)
 
             # Производиться скролл для того чтобы объявление было в зоне видимости
             scroll_down(browser)
@@ -133,6 +136,7 @@ def initial_start(avito_links: List[str], cian_link: str):
             except NoSuchElementException:
                 # Получение информации о первом посте
                 ad_info: Dict[str, str] = parse_first_add_avito(browser)
+                time.sleep(1.5)
                 # Проверка данных на валидность
                 if ad_data_validator(ad_info):
                     # Находим время выполнения
@@ -146,7 +150,7 @@ def initial_start(avito_links: List[str], cian_link: str):
                     # Вывод инфмормации одного объявления
                     print(beautiful_info_cmd(ad_info))
                     # Отправляем собранные
-                    send_data_on_server([ad_info])
+                    asyncio.run(send_data_on_server([ad_info]))
                 else:
                     print(beautiful_info_cmd(
                         {'error_info': 'INFO NOT FOUND OR NOT VALID'}))

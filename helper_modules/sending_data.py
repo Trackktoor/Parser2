@@ -8,7 +8,7 @@ from typing import Dict, List
 import requests
 
 
-def send_data_on_server(adds_info: List[Dict]):
+async def send_data_on_server(adds_info: List[Dict]):
     """
         Функция для отправки информации объявлений на сервер
     """

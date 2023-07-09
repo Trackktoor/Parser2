@@ -69,7 +69,7 @@ def find_element_on_page_by_class_name(browser: webdriver.Firefox, class_: str) 
     """
     try:
         # Настройка объекта ожидания
-        wait: WebDriverWait = WebDriverWait(browser, 10, poll_frequency=0.1)
+        wait: WebDriverWait = WebDriverWait(browser, 15, poll_frequency=0.1)
         # Поиск объявления в течении 10 секунд с интервалом в 0.1 секунду
         element: WebElement = wait.until(EC.visibility_of_element_located(
             (By.CLASS_NAME, class_)
