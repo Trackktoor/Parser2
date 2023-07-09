@@ -28,12 +28,17 @@ from selenium.webdriver.firefox.service import Service
 # Вспомогательные функции
 # Функция для сбора информации о первом элементе с странички Avito
 from parser_modules.parser_avito import parse_first_add_avito
+# Функция для сбора информации о первом элементе с странички Cian
+from parser_modules.parser_cian import parse_first_add_cian
+
 # Исключение для обработки ошибок WebDriver
 from helper_modules.exeptions import WebDriverExeption
 # Валидатор данных объявления
 from helper_modules.validators import ad_data_validator
 # Функция для красивого вывода данных
 from helper_modules.output_data_handlers import beautiful_info_cmd
+
+from helper_modules.sending_data import send_data_on_server
 
 
 def scroll_down(passed_in_driver: webdriver.Firefox):
@@ -60,7 +65,7 @@ def initial_browser() -> webdriver.Firefox:
     opts: webdriver.FirefoxOptions = webdriver.FirefoxOptions()
     opts.set_preference('dom.webdriver.enabled', False)
     # Параметр для отключения графческой оболочки
-    opts.add_argument('-headless')
+    # opts.add_argument('-headless')
     opts.binary_location = binary_loc
     # Отключение логов
     opts.set_preference("log.level", "OFF")
@@ -92,6 +97,13 @@ def initial_start(avito_links: List[str], cian_link: str):
     browser: webdriver.Firefox = initial_browser()
 
     try:
+        # Сбор данных с циана
+        browser.get(cian_link)
+        ad_info: Dict[str, str] = parse_first_add_cian(browser)
+        # Отправка данных на сервер
+        send_data_on_server([ad_info])
+        # Вывод информации
+        print(beautiful_info_cmd(ad_info))
         # Цикл для ссылок авито
         for link in avito_links:
             # Отметка времени начала сбора информации из
@@ -123,6 +135,8 @@ def initial_start(avito_links: List[str], cian_link: str):
                     count += lead_time
                     # Вывод инфмормации одного объявления
                     print(beautiful_info_cmd(ad_info))
+                    # Отправляем собранные
+                    send_data_on_server([ad_info])
                 else:
                     print(beautiful_info_cmd(
                         {'error_info': 'INFO NOT FOUND OR NOT VALID'}))

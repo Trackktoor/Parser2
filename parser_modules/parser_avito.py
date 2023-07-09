@@ -68,7 +68,9 @@ def find_element_on_page_by_class_name(browser: webdriver.Firefox, class_: str) 
         Поиск элемента с помощю ожиданий по классу возвращает сам элемент если находит его
     """
     try:
+        # Настройка объекта ожидания
         wait: WebDriverWait = WebDriverWait(browser, 10, poll_frequency=0.1)
+        # Поиск объявления в течении 10 секунд с интервалом в 0.1 секунду
         element: WebElement = wait.until(EC.visibility_of_element_located(
             (By.CLASS_NAME, class_)
         ))
@@ -84,6 +86,7 @@ def parse_item_info_on_add_by_class_name(browser: webdriver.Firefox, class_: str
         Функция-шаблон для сбора информации по классам из 1-го объявления Avito
         В случае когда элемент не найден возвращает "None"
     """
+    # Поиск ифнормации
     info: Union[WebElement, None] = find_element_on_page_by_class_name(
         browser, class_)
     if info is not None:
@@ -110,6 +113,7 @@ def parse_price_add_avito(browser: webdriver.Firefox) -> str:
     """
     price = parse_item_info_on_add_by_class_name(
         browser, 'styles-module-root-LIAav')
+    # Получаем строку именно с числом без доп. символов
     price = price.replace('\xa0', '')[:-10]
     return price
 
@@ -118,10 +122,13 @@ def parse_url_add_avito(browser: webdriver.Firefox) -> str:
     """
         Функция для сбора ссылки на объявление
     """
+    # Находим родителсикй контейнер
     ad_container = find_element_on_page_by_class_name(
         browser, 'iva-item-title-py3i_')
     if ad_container is not None:
+        # Находим ссылку в контейнере
         link_container = ad_container.find_element(By.TAG_NAME, 'a')
+        # Находим атрибут href
         link_href_container = link_container.get_attribute('href')
         if link_href_container is not None:
             return str(link_container.get_attribute('href'))
@@ -140,12 +147,20 @@ def parse_date_add_avito(browser: webdriver.Firefox) -> str:
         "iva-item-dateInfoStep-_acjp"
     )
     if time != 'None':
+        # разбиваем нашу дату так как она приходит к нам в формате
+        # N минут/часов назад
         time_split: List[str] = time.split(' ')
 
         if 'час' in time_split[1]:
-            return str(datetime.now() - timedelta(hours=int(time_split[0])) - timedelta(hours=3))
+            return str(
+                datetime.now() -
+                timedelta(hours=int(time_split[0])) - timedelta(hours=3)
+            )
         if 'мин' in time_split[1]:
-            return str(datetime.now() - timedelta(minutes=int(time_split[0])) - timedelta(hours=3))
+            return str(
+                datetime.now() -
+                timedelta(minutes=int(time_split[0])) - timedelta(hours=3)
+            )
     return 'None'
 
 
@@ -224,7 +239,7 @@ def parse_first_add_avito(browser: webdriver.Firefox) -> Dict[str, str]:
     """
         Собирает всю информацию о первом объявлении Avito
     """
-
+    # Сбор информации с объявления
     title: str = parse_item_info_on_add_by_class_name(
         browser, 'styles-module-root-TWVKW')
 
@@ -242,9 +257,9 @@ def parse_first_add_avito(browser: webdriver.Firefox) -> Dict[str, str]:
         'title': title,
         'date': date,
         'phone': phone if phone is not None else 'Не найден',
-        'url': url if url is not 'None' else 'Не найден',
-        'price': str(price) if price is not 'None' else 'Не найден',
-        'address': address if address is not 'None' else 'Не найден',
+        'url': url if url != 'None' else 'Не найден',
+        'price': str(price) if price != 'None' else 'Не найден',
+        'address': address if address != 'None' else 'Не найден',
         'marketing_source': '1'
     }
 
