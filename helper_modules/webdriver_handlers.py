@@ -63,7 +63,13 @@ def initial_browser() -> webdriver.Firefox:
     service: Service = Service(driver_loc)
 
     opts: webdriver.FirefoxOptions = webdriver.FirefoxOptions()
-    opts.set_preference('dom.webdriver.enabled', False)
+    opts.set_preference('useAutomationExtension', False)
+    opts.set_preference("dom.webdriver.enabled", False)
+    opts.set_preference('devtools.jsonview.enabled', False)
+    opts.add_argument("--width=100")
+    opts.add_argument("--height=100")
+    opts.set_preference("general.useragent.override",
+                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36 OPR/99.0.0.0 (Edition Yx GX)")
     # Параметр для отключения графческой оболочки
     # opts.add_argument('-headless')
     opts.binary_location = binary_loc
@@ -98,19 +104,23 @@ def initial_start(avito_links: List[str], cian_link: str):
 
     try:
         # Сбор данных с циана
-        browser.get(cian_link)
-        ad_info: Dict[str, str] = parse_first_add_cian(browser)
-        # Отправка данных на сервер
-        send_data_on_server([ad_info])
-        # Вывод информации
-        print(beautiful_info_cmd(ad_info))
+        # browser.get(cian_link)
+        # ad_info: Dict[str, str] = parse_first_add_cian(browser)
+        # # Отправка данных на сервер
+        # send_data_on_server([ad_info])
+        # # Вывод информации
+        # print(beautiful_info_cmd(ad_info))
         # Цикл для ссылок авито
         for link in avito_links:
             # Отметка времени начала сбора информации из
             # первого объявления
             start_time: float = time.time()
             # получение странички по ссылке
+            browser.set_window_size(100, 100)
             browser.get(link)
+            browser.set_window_size(1200, 760)
+            time.sleep(10)
+
             # Производиться скролл для того чтобы объявление было в зоне видимости
             scroll_down(browser)
 

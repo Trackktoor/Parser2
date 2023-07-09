@@ -147,20 +147,22 @@ def parse_date_add_cian(parent: WebElement) -> str:
     return 'None'
 
 
-def parse_phone_add_cian(parent: WebElement) -> Union[str, None]:
+def parse_phone_add_cian(parent: WebElement, browser: webdriver.Firefox) -> Union[str, None]:
     """
         Функция собирает номер телефона с первого объявления на авито
     """
     try:
         # Находим контейнер кнопки
-        button = parent.find_element(
-            By.CLASS_NAME, '_93444fe79c--button--Cp1dl')
-
-        button.click()
-        # Получаем номер телефона
-        phone = parent.find_elements(
-            By.CLASS_NAME, '_93444fe79c--container--aWzpE')[3].text
-        return phone
+        button = find_element_on_page_by_class_name(
+            browser, '_93444fe79c--button--Cp1dl')
+        # _93444fe79c--button--Cp1dl
+        if button is not None:
+            button.click()
+            # Получаем номер телефона
+            phone = parent.find_elements(
+                By.CLASS_NAME, '_93444fe79c--container--aWzpE')[3].text
+            return phone
+        return None
     except NoSuchElementException:
         return None
 
@@ -171,33 +173,35 @@ def parse_first_add_cian(browser: webdriver.Firefox) -> Dict[str, str]:
     """
 
     # Родительский контейнер объявления
-    parent_container = browser.find_element(
-        By.CLASS_NAME, '_93444fe79c--card--ibP42')
+    parent_container = find_element_on_page_by_class_name(
+        browser, '_93444fe79c--card--ibP42')
+    if parent_container is not None:
+        # Сбор информации с объявления
 
-    # Сбор информации с объявления
+        title: str = parse_item_info_on_add_by_class_name(
+            browser, '_93444fe79c--row--kEHOK')
 
-    title: str = parse_item_info_on_add_by_class_name(
-        browser, '_93444fe79c--row--kEHOK')
+        date: str = parse_date_add_cian(parent_container)
 
-    date: str = parse_date_add_cian(parent_container)
+        phone: Union[str, None] = parse_phone_add_cian(
+            parent_container, browser)
 
-    phone: Union[str, None] = parse_phone_add_cian(parent_container)
+        url: str = parse_url_add_cian(parent_container)
 
-    url: str = parse_url_add_cian(parent_container)
+        price: str = parse_price_add_cian(parent_container)
 
-    price: str = parse_price_add_cian(parent_container)
+        address: str = parse_address_add_cian(parent_container)
 
-    address: str = parse_address_add_cian(parent_container)
-
-    return {
-        'title': title,
-        'date': date,
-        'phone': phone if phone is not None else 'Не найден',
-        'url': url if url != 'None' else 'Не найден',
-        'price': str(price) if price != 'None' else 'Не найден',
-        'address': address if address != 'None' else 'Не найден',
-        'marketing_source': '0'
-    }
+        return {
+            'title': title,
+            'date': date,
+            'phone': phone if phone is not None else 'Не найден',
+            'url': url if url != 'None' else 'Не найден',
+            'price': str(price) if price != 'None' else 'Не найден',
+            'address': address if address != 'None' else 'Не найден',
+            'marketing_source': '0'
+        }
+    return {'None': 'None'}
 
 
 if __name__ == '__main__':

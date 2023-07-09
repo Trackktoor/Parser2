@@ -16,9 +16,9 @@ def send_data_on_server(adds_info: List[Dict]):
         requests.post('http://elka18pl.beget.tech/request_proceed/', data={
             'date': str(item['date']),
             'phone': item['phone'],
-            'url': item['url'],
+            'url_data': item['url'],
             'title': item['title'],
-            'price': item['price'],
+            'price': int(item['price'].replace(' ', '')),
             'marketing_source': int(item['marketing_source']),
             'address': item['address']
         }, timeout=1)
