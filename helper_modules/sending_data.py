@@ -13,6 +13,7 @@ async def send_data_on_server(adds_info: List[Dict]):
         Функция для отправки информации объявлений на сервер
     """
     for item in adds_info:
+        print('PRICE: ' + item['price'])
         requests.post('http://elka18pl.beget.tech/request_proceed/', data={
             'date': str(item['date']),
             'phone': item['phone'],
@@ -21,4 +22,4 @@ async def send_data_on_server(adds_info: List[Dict]):
             'price': int(item['price'].replace(' ', '')),
             'marketing_source': int(item['marketing_source']),
             'address': item['address']
-        }, timeout=1)
+        })

@@ -10,6 +10,8 @@ from datetime import timedelta
 
 import traceback
 
+import time
+
 # Класс для посика элементов
 from selenium.webdriver.common.by import By
 
@@ -64,6 +66,27 @@ def find_element_on_page_by_class_name(browser: webdriver.Firefox, class_: str) 
             (By.CLASS_NAME, class_)
         ))
         return element
+    except TimeoutException:
+        print(beautiful_info_cmd({'error': 'ELEMENT NOT FOUND ON 10 SECONDS'}))
+        print(traceback.format_exc())
+        return None
+
+
+def find_elements_on_page_by_class_name(browser: webdriver.Firefox, class_: str) -> Union[List[WebElement], None]:
+    """
+        Поиск элементов с помощю ожиданий по классу возвращает сами элементы если находит их
+    """
+    try:
+        # Настройка объекта ожидания
+        wait: WebDriverWait = WebDriverWait(browser, 15, poll_frequency=0.1)
+        # Поиск объявления в течении 10 секунд с интервалом в 0.1 секунду
+        elements: WebElement = wait.until(EC.visibility_of_all_elements_located(
+            (By.CLASS_NAME, class_)
+        ))
+        # Проверка elements на то что они найдены
+        if isinstance(elements, List):
+            return elements
+        return None
     except TimeoutException:
         print(beautiful_info_cmd({'error': 'ELEMENT NOT FOUND ON 10 SECONDS'}))
         print(traceback.format_exc())
@@ -147,20 +170,19 @@ def parse_date_add_cian(parent: WebElement) -> str:
     return 'None'
 
 
-def parse_phone_add_cian(parent: WebElement, browser: webdriver.Firefox) -> Union[str, None]:
+def parse_phone_add_cian(browser: webdriver.Firefox) -> Union[str, None]:
     """
         Функция собирает номер телефона с первого объявления на авито
     """
     try:
-        # Находим контейнер кнопки
-        button = find_element_on_page_by_class_name(
-            browser, '_93444fe79c--button--Cp1dl')
-        # _93444fe79c--button--Cp1dl
-        if button is not None:
-            button.click()
-            # Получаем номер телефона
-            phone = parent.find_elements(
-                By.CLASS_NAME, '_93444fe79c--container--aWzpE')[3].text
+        # Кликаем с помощью JS
+        browser.execute_script(
+            f"document.getElementsByClassName('_93444fe79c--button--Cp1dl _93444fe79c--button--IqIpq _93444fe79c--XS--Q3OqJ _93444fe79c--button--OhHnj _93444fe79c--full-width--MF714')[0].click()")
+        # Получаем номер телефона с помощью JS
+        phone = browser.execute_script(
+            'return document.getElementsByClassName("_93444fe79c--color_black_100--kPHhJ _93444fe79c--lineHeight_5u--cJ35s _93444fe79c--fontWeight_bold--ePDnv _93444fe79c--fontSize_14px--TCfeJ _93444fe79c--display_block--pDAEx _93444fe79c--text--g9xAG")[0].textContent'
+        )
+        if phone is not None:
             return phone
         return None
     except NoSuchElementException:
@@ -183,8 +205,7 @@ def parse_first_add_cian(browser: webdriver.Firefox) -> Dict[str, str]:
 
         date: str = parse_date_add_cian(parent_container)
 
-        phone: Union[str, None] = parse_phone_add_cian(
-            parent_container, browser)
+        phone: Union[str, None] = parse_phone_add_cian(browser)
 
         url: str = parse_url_add_cian(parent_container)
 
@@ -193,13 +214,13 @@ def parse_first_add_cian(browser: webdriver.Firefox) -> Dict[str, str]:
         address: str = parse_address_add_cian(parent_container)
 
         return {
-            'title': title,
-            'date': date,
-            'phone': phone if phone is not None else 'Не найден',
-            'url': url if url != 'None' else 'Не найден',
+            'title': str(title),
+            'date': str(date),
+            'phone': str(phone) if phone is not None else 'Не найден',
+            'url': str(url) if url != 'None' else 'Не найден',
             'price': str(price) if price != 'None' else 'Не найден',
-            'address': address if address != 'None' else 'Не найден',
-            'marketing_source': '0'
+            'address': str(address) if address != 'None' else 'Не найден',
+            'marketing_source': '2'
         }
     return {'None': 'None'}
 
