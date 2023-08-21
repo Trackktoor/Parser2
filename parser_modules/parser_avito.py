@@ -10,6 +10,8 @@ from typing import Union
 from datetime import datetime
 from datetime import timedelta
 
+import builtins
+
 import traceback
 
 # Библиотека для работы с ОС
@@ -48,6 +50,8 @@ from selenium.webdriver.common.action_chains import ActionChains
 # Функция для красивого вывода информации
 from helper_modules.output_data_handlers import beautiful_info_cmd
 
+from PIL import Image
+
 
 # ВЗАИМОДЕЙСТВИЕ С БРАУЗЕРОМ
 
@@ -69,7 +73,7 @@ def find_element_on_page_by_class_name(browser: webdriver.Firefox, class_: str) 
     """
     try:
         # Настройка объекта ожидания
-        wait: WebDriverWait = WebDriverWait(browser, 15, poll_frequency=0.1)
+        wait: WebDriverWait = WebDriverWait(browser, 30, poll_frequency=0.1)
         # Поиск объявления в течении 10 секунд с интервалом в 0.1 секунду
         element: WebElement = wait.until(EC.visibility_of_element_located(
             (By.CLASS_NAME, class_)
@@ -111,6 +115,8 @@ def parse_price_add_avito(browser: webdriver.Firefox) -> str:
     """
         Функция для сбора цены на объявление
     """
+    print('PRICE')
+    print(browser.execute_script("document.getElementsByClassName('styles-module-root-LIAav')[0].innerHTML"))
     price = parse_item_info_on_add_by_class_name(
         browser, 'styles-module-root-LIAav')
     # Получаем строку именно с числом без доп. символов
@@ -175,14 +181,18 @@ def parse_phone_add_avito(browser: webdriver.Firefox) -> Union[str, None]:
         """
         encoded = src.split("base64,", 1)[1]
         data = b64decode(encoded)
-
         out = open("phone_image.png", 'wb')
         out.write(data)
         out.close()
         return 'phone_image.png'
 
+    original_open = open
+
+    def bin_open(filename, mode='rb'):       # note, the default mode now opens in binary
+        return original_open(filename, mode)
+
     def read_img(img_name: str) -> str:
-        """
+        """ 
             Функция переводи картинку в .jpg читает с нё текст
             и удаляет саму картинку возвращая при этом текст,
             который на ней находился
@@ -197,9 +207,13 @@ def parse_phone_add_avito(browser: webdriver.Firefox) -> Union[str, None]:
 
         new_img = cv2.cvtColor(image, cv2.COLOR_BGRA2BGR)
 
-        cv2.imwrite('phone_image.jpg', new_img)
+        cv2.imwrite('phone_image.png', new_img)
 
-        img_str = pytesseract.image_to_string('phone_image.jpg')
+        img = Image.open('phone_image.png')
+        img.close()
+
+        img_str = pytesseract.image_to_string(
+            'phone_image.png', config='--psm 1')
 
         os.remove(img_name)
 
@@ -207,8 +221,9 @@ def parse_phone_add_avito(browser: webdriver.Firefox) -> Union[str, None]:
 
     def get_phone_number_on_image(src: str):
         phone_image = save_image_on_src(src)
+        print('phone_image: ok')
         phone_str = read_img(phone_image)
-
+        print('phone_str: ' + phone_str)
         return phone_str
 
     # Находим контейнер кнопки
@@ -230,6 +245,7 @@ def parse_phone_add_avito(browser: webdriver.Firefox) -> Union[str, None]:
                 src_image = phone_image.get_attribute('src')
                 print('src_image: OK')
                 if src_image is not None:
+                    print('SRC IS NOT NONE')
                     phone_number = get_phone_number_on_image(src_image)
                     return phone_number
     return None
@@ -245,18 +261,21 @@ def parse_first_add_avito(browser: webdriver.Firefox) -> Dict[str, str]:
 
     date: str = parse_date_add_avito(browser)
 
-    phone: Union[str, None] = parse_phone_add_avito(browser)
+    phone = parse_phone_add_avito(browser)
 
     url: str = parse_url_add_avito(browser)
+    print('url found: '+ url)
 
     price: str = parse_price_add_avito(browser)
+    print('price found: '+ price)
 
     address: str = parse_address_add_avito(browser)
+    print('address found: '+ address)
 
     return {
         'title': title,
         'date': date,
-        'phone': phone if phone is not None else 'Не найден',
+        # 'phone': phone if phone is not None else 'Не найден',
         'url': url if url != 'None' else 'Не найден',
         'price': str(price) if price != 'None' else 'Не найден',
         'address': address if address != 'None' else 'Не найден',

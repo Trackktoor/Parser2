@@ -111,7 +111,7 @@ def initial_start(avito_links: List[str], cian_link: str):
         browser.set_window_size(1200, 760)
         ad_info: Dict[str, str] = parse_first_add_cian(browser)
         # Отправка данных на сервер
-        asyncio.run(send_data_on_server([ad_info]))
+        # asyncio.run(send_data_on_server([ad_info]))
         # Вывод информации
         print(beautiful_info_cmd(ad_info))
         # Цикл для ссылок авито
@@ -120,10 +120,11 @@ def initial_start(avito_links: List[str], cian_link: str):
             # первого объявления
             start_time: float = time.time()
             # получение странички по ссылке
-            browser.set_window_size(200, 250)
+            browser.set_window_size(300, 550)
             time.sleep(2.5)
             browser.get(link)
-            browser.set_window_size(1150, 660)
+            print('Browser next link')
+            browser.set_window_size(1250, 460)
 
             # Производиться скролл для того чтобы объявление было в зоне видимости
             scroll_down(browser)
@@ -151,7 +152,8 @@ def initial_start(avito_links: List[str], cian_link: str):
                     # Вывод инфмормации одного объявления
                     print(beautiful_info_cmd(ad_info))
                     # Отправляем собранные
-                    asyncio.run(send_data_on_server([ad_info]))
+                    # asyncio.run(send_data_on_server([ad_info]))
+                    time.sleep(5)
                 else:
                     print(beautiful_info_cmd(
                         {'error_info': 'INFO NOT FOUND OR NOT VALID'}))
